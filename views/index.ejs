@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A privay focused, open-source search engine">
+    <title>Page Hunter</title>
+    <style>
+        body {
+            --theme-background: #eff1f5;
+            --theme-text: #4c4f69;
+            --theme-crust: #dce0e8;
+
+            --theme-border: #cba6f7;
+            --theme-url: #40a02b;
+        }
+
+        @media (prefers-color-scheme: light) {
+            body {
+                --theme-background: #eff1f5;
+                --theme-text: #4c4f69;
+                --theme-crust: #dce0e8;
+
+                --theme-border: #cba6f7;
+                --theme-url: #40a02b;
+            }
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body {
+                --theme-background: #1e1e2e;
+                --theme-text: #cdd6f4;
+                --theme-crust: #11111b;
+
+                --theme-url: #a6e3a1;
+            }
+        }
+
+        body {
+            font-family: Trebuchet MS, Verdana, Tahoma, Arial, Helvetica, sans-serif;
+            background: var(--theme-background);
+            color: var(--theme-text);
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: Trebuchet MS, Verdana, Tahoma, Arial, Helvetica, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        *:focus {
+            outline: none;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .application {
+            display: flex;
+            flex-wrap: wrap;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            height: 100%;
+        }
+
+        .header,
+        .footer {
+            padding: 16px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .main {
+            padding: 16px;
+            width: 100%;
+        }
+
+        .form-container {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pg-search-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--theme-background);
+            border: 2px solid var(--theme-text);
+            border-radius: 64px;
+        }
+
+        .pg-search {
+            box-sizing: border-box;
+            position: relative;
+            display: block;
+            transform: scale(var(--ggs, 1));
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--theme-background);
+            border-radius: 100%;
+            margin-left: -4px;
+            margin-top: -4px
+        }
+
+        .pg-search::after {
+            content: "";
+            display: block;
+            box-sizing: border-box;
+            position: absolute;
+            border-radius: 3px;
+            width: 2px;
+            height: 8px;
+            background: var(--theme-background);
+            transform: rotate(-45deg);
+            top: 10px;
+            left: 12px
+        }
+
+        .pg-search-button {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 24px;
+            border-radius: 64px;
+            background: var(--theme-text);
+            border: none;
+            transition: .125s ease-in-out;
+            cursor: pointer;
+        }
+
+        .pg-search-button:hover,
+        .pg-search-button:focus {
+            background: var(--theme-border);
+            padding: 32px;
+        }
+
+        .pg-search-button-container {
+            width: 75px;
+            height: 75px;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+        }
+
+        .pg-input-field-container input[type=text] {
+            width: 0px;
+            border: 0px;
+            padding: 0;
+            background: var(--theme-background);
+            color: var(--theme-text);
+            transition: 0.5s ease-in-out;
+            font-size: medium;
+        }
+
+        .pg-input-field-container input[type=text]:focus {
+            padding: 16px;
+            width: 512px;
+            margin-inline-start: 16px;
+            transition: 1s;
+        }
+
+        .pg-search-container:hover>.pg-input-field-container input[type=text],
+        .pg-input-field-container input[type=text]:valid {
+            width: 512px;
+            padding: 16px;
+            transition: 1s;
+            margin-inline-start: 16px;
+        }
+
+        .pg-description {
+            padding-inline: 128px;
+        }
+
+        p {
+            text-indent: 2em;
+        }
+
+        .feature-listing {
+            border-inline-start: 8px solid #11111b;
+            padding-inline: 16px;
+            margin-inline-start: 32px;
+        }
+
+        /**************/
+        .gg-chevron-double-down {
+            box-sizing: border-box;
+            position: relative;
+            display: block;
+            width: 22px;
+            height: 22px;
+            animation: animate-double-down 2s ease-in-out infinite;
+        }
+
+        @keyframes animate-double-down {
+            0% {
+                transform: translateY(-4px) scale(var(--ggs, 3));
+            }
+
+            50% {
+                transform: translateY(4px) scale(var(--ggs, 3));
+            }
+
+            100% {
+                transform: translateY(-4px) scale(var(--ggs, 3));
+            }
+        }
+
+        @keyframes animate-double-down-effect {
+            0% {
+                border-color: var(--theme-text);
+            }
+
+            50% {
+                border-color: var(--theme-background);
+            }
+
+            100% {
+                border-color: var(--theme-text);
+            }
+        }
+
+        .gg-chevron-double-down::after,
+        .gg-chevron-double-down::before {
+            content: "";
+            display: block;
+            box-sizing: border-box;
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-bottom: 2px solid;
+            border-right: 2px solid;
+            transform: rotate(45deg);
+            left: 7px;
+            top: 3px;
+            animation: animate-double-down-effect 2s ease-in-out infinite;
+        }
+
+        .gg-chevron-double-down::after {
+            top: 8px
+        }
+
+        .gg-menu {
+            transform: scale(var(--ggs, 1))
+        }
+
+        .gg-menu,
+        .gg-menu::after,
+        .gg-menu::before {
+            box-sizing: border-box;
+            position: relative;
+            display: block;
+            width: 20px;
+            height: 2px;
+            border-radius: 3px;
+            background: var(--theme-background)
+        }
+
+        .gg-menu::after,
+        .gg-menu::before {
+            content: "";
+            position: absolute;
+            top: -6px
+        }
+
+        .gg-menu::after {
+            top: 6px
+        }
+
+        .animation-holder {
+            margin-top: 32px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .page {
+            width: 100%;
+            height: 100%;
+            padding-inline: 16px;
+            padding-block-start: 16px;
+        }
+
+        hr {
+            border: 2px solid var(--theme-crust);
+        }
+
+        .navigation-container {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .navigation-container .navigation-element {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            height: 48px;
+            width: 48px;
+            border-radius: 32px;
+            border: none;
+            background-color: var(--theme-text);
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="page">
+        <div class="application">
+            <div class="header">
+                <div class="navigation-container">
+                    <button class="navigation-element">
+                        <span class="gg-menu"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="main">
+                <h1 style="width: 100%; text-align: center">Page hunter</h1>
+                <h2 style="width: 100%; text-align: center;">Hunt down pages like a professional hunter</h2>
+                <form action="q" method="get" autocomplete="off">
+                    <div class="form-container">
+                        <div class="pg-search-container">
+                            <div class="pg-input-field-container">
+                                <input type="text" name="search" placeholder="Type Something..." required=""
+                                    pattern=".*\S.*">
+                            </div>
+                            <div class="pg-search-button-container">
+                                <button type="submit" class="pg-search-button" aria-label="search"><span
+                                        class="pg-search"></span></button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="footer">
+                Scroll down for more information about page hunter
+                <div class="animation-holder">
+                    <span class="gg-chevron-double-down"></span>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="pg-description">
+            <div class="pg-section">
+                <h1>What is Page hunter?</h1>
+                <p>
+                    Page hunter is a search engine developed with privacy, simplicity and elegance in mind. It is
+                    designed
+                    to be appealing while still being a excellant search engine.
+                </p>
+            </div>
+            <div class="pg-section">
+                <h1>Features</h1>
+                <div class="feature-listing">
+                    <h2># No Javascript On Client Side!</h2>
+                    <p>
+                        Page hunter does not use javascript in any way shape or form on the client side. Everything that
+                        is
+                        seen
+                        on the page is designed and layed out using HTML5 and CSS3. This ensures that page is loaded and
+                        actions
+                        are performed reponsively.
+
+                        This also eliminates scraping and leaking information on the client side. If javascript code,
+                        that
+                        directly interacts with the search engine, is embedded then there are chances that such code can
+                        be
+                        manipulated to retrieve &amp; tamper the back-end. By ensuring 0 javascript on the client side,
+                        this
+                        can
+                        be <em>Minimized</em> (yes, it cannot be completely eliminated but minimized).
+                    </p>
+                </div>
+                <div class="feature-listing">
+                    <h2># Handcrafted with HTML &amp; CSS</h2>
+                    <p>
+                        The entire site is handcrafted with technoligies like HTML5 and CSS3 on the frontend and NodeJS
+                        as
+                        the sole backend.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

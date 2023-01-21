@@ -1,0 +1,43 @@
+{
+  "name": "page-hunter",
+  "version": "0.1.0",
+  "description": "A privacy focused, open-source search engine",
+  "main": "index.js",
+  "scripts": {
+    "build": "npx tsc --build",
+    "page": "node ./dist/page/index.js",
+    "hunter": "node ./dist/hunter/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/K-54N7H05H/page-hunter.git"
+  },
+  "keywords": [
+    "search",
+    "web",
+    "search-engine",
+    "typescript"
+  ],
+  "author": "K-54N7H05H",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/K-54N7H05H/page-hunter/issues"
+  },
+  "homepage": "https://github.com/K-54N7H05H/page-hunter#readme",
+  "devDependencies": {
+    "@types/async": "^3.2.16",
+    "@types/express": "^4.17.15",
+    "@types/node": "^18.11.18",
+    "@types/pg": "^8.6.6",
+    "eslint": "^8.32.0",
+    "typescript": "^4.9.4"
+  },
+  "dependencies": {
+    "async": "^3.2.4",
+    "cheerio": "^1.0.0-rc.12",
+    "dotenv": "^16.0.3",
+    "ejs": "^3.1.8",
+    "express": "^4.18.2",
+    "pg": "^8.8.0"
+  }
+}
