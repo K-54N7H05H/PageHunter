@@ -6,7 +6,8 @@
   "scripts": {
     "build": "npx tsc --build",
     "page": "node ./dist/page/index.js",
-    "hunter": "node ./dist/hunter/index.js"
+    "hunter": "node ./dist/hunter/index.js",
+    "start": "npx tsc --build && node ./dist/page/index.js"
   },
   "repository": {
     "type": "git",
