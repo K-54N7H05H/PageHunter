@@ -53,6 +53,7 @@ conn.connect((err) => {
     application.set('view engine', 'ejs');
     // application.set('views', VIEWS_DIRECTORY)
 
+    const PORT = Number.parseInt(process.env.PORT as string) || 3000
     application.use(route)
-    application.listen(3000)
+    application.listen(PORT)
 })
