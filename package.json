@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "npx tsc --build",
-    "test": "echo 'Setting up database' && node ./dist/hunter/index.js",
-    "start": "npx tsc --build && node ./dist/page/index.js"
+    "start": "(node ./dist/hunter/index.js)& node ./dist/page/index.js"
   },
   "repository": {
     "type": "git",
