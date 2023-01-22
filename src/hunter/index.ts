@@ -10,17 +10,28 @@ let spider = new Spider({
 
 dotenv.config()
 
-let conn = new pg.Client({
-    host: process.env.PAGEHUNTER_DATABASE_HOST,
-    port: Number.parseInt(process.env.PAGEHUNTER_DATABASE_PORT as string),
-    user: process.env.PAGEHUNTER_DATABASE_USER,
-    database: process.env.PAGEHUNTER_DATABASE_NAME,
-    password: process.env.PAGEHUNTER_DATABASE_PASS,
-})
+const PAGEHUNTER_DATABASE_HOST = process.env.PAGEHUNTER_DATABASE_HOST
+const PAGEHUNTER_DATABASE_PORT = Number.parseInt(process.env.PAGEHUNTER_DATABASE_PORT as string)
+const PAGEHUNTER_DATABASE_NAME = process.env.PAGEHUNTER_DATABASE_NAME
+const PAGEHUNTER_DATABASE_USER = process.env.PAGEHUNTER_DATABASE_USER
+const PAGEHUNTER_DATABASE_PASS = process.env.PAGEHUNTER_DATABASE_PASS
 
-const MAX_CRAWL = Number.parseInt(process.env.PAGEHUNTER_MAXCRAWL as string)
-let CURR_CRAWL = 0
-let CRAWLSEED = process.env.PAGEHUNTER_CRAWLSEED as string
+const MAX_CRAWL = Number.parseInt(process.env.PAGEHUNTER_MAXCRAWL as string) || 0
+const CRAWLSEED = process.env.PAGEHUNTER_CRAWLSEED as string || 'https://example.com'
+
+console.log(`[hunter]   LOG  : Postgres database host       : ${PAGEHUNTER_DATABASE_HOST}`)
+console.log(`[hunter]   LOG  : Postgres database port       : ${PAGEHUNTER_DATABASE_PORT}`)
+console.log(`[hunter]   LOG  : Postgres database name       : ${PAGEHUNTER_DATABASE_NAME}`)
+console.log(`[hunter]   LOG  : Postgres database username   : ${PAGEHUNTER_DATABASE_USER}`)
+console.log(`[hunter]   LOG  : Postgres database password   : ${PAGEHUNTER_DATABASE_PASS}`)
+
+let conn = new pg.Client({
+    host: PAGEHUNTER_DATABASE_HOST,
+    port: PAGEHUNTER_DATABASE_PORT,
+    user: PAGEHUNTER_DATABASE_USER,
+    database: PAGEHUNTER_DATABASE_NAME,
+    password: PAGEHUNTER_DATABASE_PASS,
+})
 
 console.log(`[hunter]   Crawling maximum of (${MAX_CRAWL} pages from ${CRAWLSEED})`)
 
@@ -73,10 +84,6 @@ function render_webpage(node: CheerioAPI | Document | string | Element | Cheerio
 }
 /********************************* */
 
-async function setup_database() {
-
-}
-
 const DATABASE_SETUP = `
 CREATE TABLE IF NOT EXISTS page (
     id BIGSERIAL PRIMARY KEY NOT NULL,
@@ -89,9 +96,10 @@ CREATE TABLE IF NOT EXISTS page_body (
     id BIGINT PRIMARY KEY NOT NULL,
     body tsvector,
     CONSTRAINT fk_page_body_id FOREIGN KEY(id) REFERENCES page(id)
-);
-`
+    );
+    `
 
+let CURR_CRAWL = 0
 conn.connect((err) => {
     if (err) {
         console.error(`[hunter]   ERROR: Failed to connect to database: ${err}`)
@@ -128,7 +136,6 @@ conn.connect((err) => {
                 }).catch((err) => {
                     console.error(`[hunter]   ERROR: ${err}`)
                     CURR_CRAWL += 1
-                }).finally(() => {
                 })
             }
         }).catch(() => {
