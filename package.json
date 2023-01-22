@@ -5,13 +5,12 @@
   "main": "index.js",
   "scripts": {
     "build": "npx tsc --build",
-    "page": "node ./dist/page/index.js",
-    "hunter": "node ./dist/hunter/index.js",
+    "test": "echo 'Setting up database' && node ./dist/hunter/index.js",
     "start": "npx tsc --build && node ./dist/page/index.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/K-54N7H05H/page-hunter.git"
+    "url": "git+https://github.com/K-54N7H05H/PageHunter.git"
   },
   "keywords": [
     "search",
@@ -22,9 +21,9 @@
   "author": "K-54N7H05H",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/K-54N7H05H/page-hunter/issues"
+    "url": "https://github.com/K-54N7H05H/PageHunter/issues"
   },
-  "homepage": "https://github.com/K-54N7H05H/page-hunter#readme",
+  "homepage": "https://github.com/K-54N7H05H/PageHunter#readme",
   "devDependencies": {
     "@types/async": "^3.2.16",
     "@types/express": "^4.17.15",
