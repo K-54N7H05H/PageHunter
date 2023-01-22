@@ -4,7 +4,7 @@
   "description": "A privacy focused, open-source search engine",
   "scripts": {
     "build": "npx tsc --build",
-    "start": "(node ./dist/hunter/index.js)& node ./dist/page/index.js"
+    "start": "node ./dist/page/index.js"
   },
   "repository": {
     "type": "git",
