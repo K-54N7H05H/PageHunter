@@ -105,6 +105,8 @@ conn.connect((err) => {
                 })
             }).catch((err) => {
                 console.error(`[hunter]   ERROR: ${err}`)
+            }).finally(() => {
+                CURR_CRAWL += 1;
             })
         }
     }).catch(() => {
