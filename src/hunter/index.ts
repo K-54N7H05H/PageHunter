@@ -18,13 +18,13 @@ let conn = new pg.Client({
     password: process.env.PAGEHUNTER_DATABASE_PASS,
 })
 
-const MAX_CRAWL = Number.parseInt(process.env.PAGEHUNTER_MAXCRAWL as string);
+const MAX_CRAWL = Number.parseInt(process.env.PAGEHUNTER_MAXCRAWL as string)
 let CURR_CRAWL = 0
 let CRAWLSEED = process.env.PAGEHUNTER_CRAWLSEED as string
 
 console.log(`[hunter]   Crawling maximum of (${MAX_CRAWL} pages from ${CRAWLSEED})`)
 
-const PAGE_INSERT_QUERY = 'INSERT INTO page(url, title, visited) VALUES ($1, $2, CURRENT_TIMESTAMP) ON CONFLICT(url) DO UPDATE SET title=$2, visited=CURRENT_TIMESTAMP RETURNING ID';
+const PAGE_INSERT_QUERY = 'INSERT INTO page(url, title, visited) VALUES ($1, $2, CURRENT_TIMESTAMP) ON CONFLICT(url) DO UPDATE SET title=$2, visited=CURRENT_TIMESTAMP RETURNING ID'
 const PAGE_BODY_INSERT_QUERY = 'INSERT INTO page_body VALUES($1, to_tsvector($2)) ON CONFLICT(id) DO UPDATE SET body=to_tsvector($2) RETURNING ID'
 
 /******************************************************************************************************** */
@@ -73,47 +73,73 @@ function render_webpage(node: CheerioAPI | Document | string | Element | Cheerio
 }
 /********************************* */
 
+async function setup_database() {
+
+}
+
+const DATABASE_SETUP = `
+CREATE TABLE IF NOT EXISTS page (
+    id BIGSERIAL PRIMARY KEY NOT NULL,
+    url text UNIQUE NOT NULL,
+    title text NOT NULL,
+    visited timestamp without time zone NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS page_body (
+    id BIGINT PRIMARY KEY NOT NULL,
+    body tsvector,
+    CONSTRAINT fk_page_body_id FOREIGN KEY(id) REFERENCES page(id)
+);
+`
+
 conn.connect((err) => {
     if (err) {
         console.error(`[hunter]   ERROR: Failed to connect to database: ${err}`)
         process.exit(-2)
     }
+
     console.log(`[hunter]   INFO : Opened database connection`)
 
-    let CRAWL = MAX_CRAWL
-    spider.visit(CRAWLSEED, {
-        beforeLoad(url: URL) { return --CRAWL >= 0; },
-        visit(page: Page) {
-            const PAGE_URL: string = page.url.toString()
-            const PAGE_TITLE: string = page.$("title").text()
+    conn.query(DATABASE_SETUP).then(() => {
+        console.log(`[hunter]   LOG  : Tables created / exists`)
+        let CRAWL = MAX_CRAWL
+        spider.visit(CRAWLSEED, {
+            beforeLoad(url: URL) { return --CRAWL >= 0 },
+            visit(page: Page) {
+                const PAGE_URL: string = page.url.toString()
+                const PAGE_TITLE: string = page.$("title").text()
 
-            conn.query(PAGE_INSERT_QUERY, [PAGE_URL, PAGE_TITLE]).then((res) => {
-                const PAGE_ID = res.rows[0].id
-                const BODY = render_webpage(page.$("html > body"))
-                    .trim()
+                conn.query(PAGE_INSERT_QUERY, [PAGE_URL, PAGE_TITLE]).then((res) => {
+                    const PAGE_ID = res.rows[0].id
+                    const BODY = render_webpage(page.$("html > body"))
+                        .trim()
 
-                conn.query(PAGE_BODY_INSERT_QUERY, [PAGE_ID, BODY]).catch((err) => {
+                    conn.query(PAGE_BODY_INSERT_QUERY, [PAGE_ID, BODY]).catch((err) => {
+                        console.error(`[hunter]   ERROR: ${err}`)
+                    }).finally(() => {
+                        CURR_CRAWL += 1
+                        console.info(`[hunter]   INFO : (${CURR_CRAWL}) Indexed ${PAGE_TITLE} (${PAGE_URL})`)
+                        if (CURR_CRAWL >= MAX_CRAWL) {
+                            console.info(`[hunter]   INFO : Crawled & inserted ${CURR_CRAWL} pages`)
+                            console.info(`[hunter]   INFO : Closing connection`)
+                            conn.end()
+                        }
+                    })
+                }).catch((err) => {
                     console.error(`[hunter]   ERROR: ${err}`)
+                    CURR_CRAWL += 1
                 }).finally(() => {
-                    CURR_CRAWL += 1;
-                    console.info(`[hunter]   INFO : (${CURR_CRAWL}) Indexed ${PAGE_TITLE} (${PAGE_URL})`)
-                    if (CURR_CRAWL >= MAX_CRAWL) {
-                        console.info(`[hunter]   INFO : Crawled & inserted ${CURR_CRAWL} pages`)
-                        console.info(`[hunter]   INFO : Closing connection`)
-                        conn.end()
-                    }
                 })
-            }).catch((err) => {
-                console.error(`[hunter]   ERROR: ${err}`)
-            }).finally(() => {
-                CURR_CRAWL += 1;
-            })
-        }
-    }).catch(() => {
-        CURR_CRAWL += 1;
-        console.error(`[hunter]   ERROR: Error occured`)
-    }).finally(() => {
-        console.info(`[hunter]   INFO : Crawled ${CURR_CRAWL} pages`)
+            }
+        }).catch(() => {
+            CURR_CRAWL += 1
+            console.error(`[hunter]   ERROR: Error occured`)
+        }).finally(() => {
+            console.info(`[hunter]   INFO : Crawled ${CURR_CRAWL} pages`)
+        })
+    }).catch((err) => {
+        console.error(`[hunter]   ERROR: ${err}`)
     })
+
 })
 
